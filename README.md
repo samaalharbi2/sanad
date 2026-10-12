@@ -1,6 +1,5 @@
 # Sanad (سَنَد)
 
-[العربية](README.ar.md)
 
 **Check your file before you share it.**
 A local-first compliance assistant for Saudi Arabia's Personal Data Protection Law (PDPL). Sanad finds personal data in an organization's files, classifies it by the law's definitions, and tells you what the law requires — all running on the organization's own machine.
