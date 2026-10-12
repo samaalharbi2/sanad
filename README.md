@@ -31,7 +31,7 @@ The PDPL and its Implementing Regulation require organizations to collect only t
 
 **The Data Protection Officer (DPO).** Article 32 of the Implementing Regulation requires appointing one in several cases — including public entities providing services that involve large-scale processing of personal data. The DPO's duties include overseeing impact assessments and notifying the authority of data breaches. Sanad gives them the picture they need: where the personal data is, how risky it is, and what to do about it.
 
-```
+
 
 ## Data engineering
 
