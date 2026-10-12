@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سَنَد | فحص الملفات قبل المشاركة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+
+<!-- الشريط العلوي -->
+<header class="masthead">
+  <div class="container masthead-row">
+    <a class="brand" href="#/" aria-label="سَنَد - الصفحة الرئيسية">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <span class="brand-text">
+        <span class="brand-name">سَنَد</span>
+        <span class="brand-sub">فاحص الملفات قبل المشاركة</span>
+      </span>
+    </a>
+    <div class="system-status" id="sys-status" role="status" aria-live="polite">
+      <span class="status-dot" aria-hidden="true"></span><span class="status-text">جاري التحقق من حالة النظام…</span>
+    </div>
+  </div>
+  <nav class="mainnav" aria-label="التنقل الرئيسي">
+    <div class="container mainnav-row">
+      <a href="#/" data-nav="scan">فحص الملفات</a>
+      <a href="#/monitor" data-nav="monitor">المراقبة الدورية</a>
+      <a href="#/privacy" data-nav="privacy">الخصوصية ومعالجة الملفات</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="مسار التنقل"><ol id="crumbs"></ol></nav>
+  </div>
+
+  <!-- ١) فحص الملفات -->
+  <section class="view" id="view-scan" aria-labelledby="h-scan">
+    <div class="container">
+      <header class="page-header">
+        <h1 id="h-scan">فحص الملفات قبل المشاركة</h1>
+        <p>تفحص الخدمة الملفات بحثًا عن مؤشرات البيانات الشخصية والحساسة قبل مشاركتها مع جهة أخرى، وتعرض الملاحظات والتوصيات المرتبطة بنظام حماية البيانات الشخصية.</p>
+      </header>
+
+      <div class="layout-2">
+        <div class="card upload-card">
+          <!-- الحالة: اختيار الملفات -->
+          <div id="upload-pick">
+            <div class="card-head">
+              <h2 class="card-title">الملفات المراد فحصها</h2>
+            </div>
+            <div class="dropzone" id="drop">
+              <svg class="drop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6M9.5 13.5L12 11l2.5 2.5"/></svg>
+              <p class="drop-title">اسحب الملفات وأفلتها هنا</p>
+              <p class="drop-sub">أو</p>
+              <button class="btn btn-secondary" type="button" id="pick-btn">اختيار ملفات من الجهاز</button>
+              <input type="file" id="file" hidden multiple accept=".csv,.xlsx,.docx,.pdf,.jsonl,.txt">
+            </div>
+            <ul class="file-list" id="file-list" aria-label="الملفات المختارة"></ul>
+            <div class="card-actions">
+              <button class="btn btn-primary" id="start" type="button" disabled>بدء الفحص</button>
+              <button class="btn btn-link" id="clear" type="button" hidden>إزالة الكل</button>
+              <span class="hint" id="start-hint">اختر ملفًا واحدًا على الأقل لبدء الفحص.</span>
+            </div>
+          </div>
+
+          <!-- الحالة: الفحص جارٍ -->
+          <div id="upload-progress" hidden>
+            <div class="card-head"><h2 class="card-title">جاري الفحص</h2></div>
+            <div role="status" aria-live="polite">
+              <p class="progress-label" id="prog-label">جاري رفع الملفات…</p>
+              <div class="progress" aria-hidden="true"><div class="progress-bar" id="prog-bar"></div></div>
+              <ol class="steps" id="steps">
+                <li data-step="upload">رفع الملفات</li>
+                <li data-step="analyze">قراءة المحتوى والبحث عن مؤشرات البيانات الشخصية</li>
+                <li data-step="results">إعداد الملاحظات والتوصيات</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- الحالة: خطأ -->
+          <div id="upload-error" hidden>
+            <div class="card-head"><h2 class="card-title">تعذّر إكمال الفحص</h2></div>
+            <div class="alert alert-danger" role="alert">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></svg>
+              <div><p id="error-text"></p></div>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary" id="retry" type="button">إعادة المحاولة</button>
+              <button class="btn btn-secondary" id="repick" type="button">اختيار ملفات أخرى</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side">
+          <div class="card">
+            <h2 class="card-title">متطلبات الملفات</h2>
+            <dl class="spec">
+              <dt>الصيغ المدعومة</dt><dd>Excel (xlsx)، CSV، Word (docx)، PDF نصي، TXT، JSONL</dd>
+              <dt>الحد الأقصى</dt><dd>10 ملفات في الفحص الواحد، و50 ميجابايت لكل ملف</dd>
+              <dt>غير مدعوم</dt><dd>ملفات PDF الممسوحة ضوئيًا (صور)، والملفات المحمية بكلمة مرور</dd>
+            </dl>
+          </div>
+          <div class="card">
+            <h2 class="card-title">ما الذي يُفحص؟</h2>
+            <ul class="checklist">
+              <li>أرقام الهوية والإقامة والجواز والآيبان</li>
+              <li>الأسماء والجوالات والبريد والعناوين وتواريخ الميلاد</li>
+              <li>البيانات الحساسة والائتمانية كما عرّفها النظام</li>
+            </ul>
+            <p class="muted small">تُعالج الملفات على الجهاز الذي يشغّل الخدمة وتُحذف فور انتهاء الفحص. <a href="#/privacy">تفاصيل المعالجة</a></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ٢) نتيجة الفحص -->
+  <section class="view" id="view-results" aria-labelledby="h-results">
+    <div class="container">
+      <header class="page-header row">
+        <div>
+          <h1 id="h-results">نتيجة الفحص</h1>
+          <p id="res-meta"></p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-secondary" id="report-btn" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>تقرير PDF</a>
+          <a class="btn btn-primary" href="#/" id="new-scan">فحص ملفات جديدة</a>
+        </div>
+      </header>
+
+      <div id="res-alert"></div>
+      <div class="stats" id="stats"></div>
+
+      <div id="res-body">
+        <div class="layout-2 even">
+          <section class="card" aria-labelledby="h-risk">
+            <h2 class="card-title" id="h-risk">ملخص المخاطر</h2>
+            <div class="risk-summary" id="risk-summary"></div>
+            <details class="explain">
+              <summary>كيف نحدد مستوى الخطورة؟</summary>
+              <ul>
+                <li><b>عالية:</b> البيانات الحساسة والائتمانية كما عرّفها النظام، والأرقام التي تكفي وحدها للاحتيال أو انتحال الشخصية (الهوية، الجواز، الآيبان).</li>
+                <li><b>متوسطة:</b> بيانات تعرّف الشخص أو توصل إليه، مثل الاسم والجوال والبريد والعنوان وتاريخ الميلاد.</li>
+                <li><b>منخفضة:</b> معرّفات تقنية مثل معرّف الجهاز.</li>
+              </ul>
+              <p>النظام لا يحدد درجات خطورة؛ هذا تصنيف الخدمة لترتيب الأولويات.</p>
+            </details>
+          </section>
+          <section class="card" aria-labelledby="h-types">
+            <h2 class="card-title" id="h-types">أنواع البيانات المكتشفة</h2>
+            <div id="types"></div>
+          </section>
+        </div>
+
+        <section class="card" aria-labelledby="h-findings">
+          <div class="card-head">
+            <h2 class="card-title" id="h-findings">الملاحظات</h2>
+            <div class="segmented" id="risk-filter" role="group" aria-label="تصفية حسب الخطورة"></div>
+          </div>
+          <ul class="findings" id="findings"></ul>
+          <details class="explain">
+            <summary>ماذا يعني مستوى الثقة؟</summary>
+            <ul>
+              <li><b>عالية:</b> القيمة طابقت شكلًا ثابتًا ونجحت في فحص الصحة، مثل رقم التحقق في الهوية.</li>
+              <li><b>متوسطة:</b> حكم عليها النموذج اللغوي، مثل الأسماء.</li>
+              <li><b>منخفضة:</b> عُرفت من اسم العمود فقط، ويُنصح بمراجعتها.</li>
+            </ul>
+          </details>
+        </section>
+
+        <section class="card" aria-labelledby="h-recs">
+          <h2 class="card-title" id="h-recs">الإجراءات المطلوبة نظاميًا</h2>
+          <div class="recs" id="recs"></div>
+        </section>
+      </div>
+
+      <section class="card" aria-labelledby="h-files">
+        <h2 class="card-title" id="h-files">الملفات المفحوصة</h2>
+        <div class="table-wrap"><table class="table" id="files-table"></table></div>
+      </section>
+
+      <section class="card" id="ask-card" aria-labelledby="h-ask">
+        <h2 class="card-title" id="h-ask">اسأل عن نتائج الفحص</h2>
+        <form class="ask-form" id="ask-form">
+          <label for="ask-q" class="sr-only">سؤالك</label>
+          <input id="ask-q" class="input" type="text" placeholder="اكتب سؤالك هنا" autocomplete="off">
+          <button class="btn btn-primary" type="submit">إرسال</button>
+        </form>
+        <div class="answers" id="answers" aria-live="polite"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ٣) المراقبة الدورية -->
+  <section class="view" id="view-monitor" aria-labelledby="h-monitor">
+    <div class="container">
+      <header class="page-header row">
+        <div>
+          <h1 id="h-monitor">المراقبة الدورية</h1>
+          <p>تفحص الخدمة مجلدًا محددًا بشكل دوري، وتفحص الملفات الجديدة والمتغيرة فقط، وتحفظ سجلًا لكل فحص.</p>
+        </div>
+        <div class="actions" id="mon-actions" hidden>
+          <a class="btn btn-secondary" href="/report?run=latest" target="_blank" rel="noopener" id="mon-report">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>تقرير PDF</a>
+          <button class="btn btn-primary" id="mon-run" type="button">فحص الآن</button>
+        </div>
+      </header>
+
+      <section class="card" aria-labelledby="h-folder">
+        <h2 class="card-title" id="h-folder">المجلد المراقب</h2>
+        <form class="ask-form" id="folder-form">
+          <label for="folder-in" class="sr-only">مسار المجلد</label>
+          <input id="folder-in" class="input ltr-input" type="text" dir="ltr" placeholder="C:\Shared\Department" autocomplete="off">
+          <button class="btn btn-secondary" type="submit">حفظ</button>
+        </form>
+        <p class="hint" id="folder-msg">انسخ مسار المجلد من مستكشف الملفات والصقه هنا.</p>
+        <div id="mon-progress" role="status" aria-live="polite" hidden>
+          <p class="progress-label" id="mon-progress-text"></p>
+          <div class="progress" aria-hidden="true"><div class="progress-bar" id="mon-fill"></div></div>
+        </div>
+      </section>
+
+      <div class="empty" id="mon-empty" hidden>
+        <p>لا يوجد فحص محفوظ لهذا المجلد بعد. اضغط «فحص الآن» لإجراء أول فحص.</p>
+      </div>
+
+      <div id="mon-body" hidden>
+        <p class="last-run" id="mon-last"></p>
+        <div class="stats" id="mon-stats"></div>
+
+        <div class="layout-2 even">
+          <section class="card" aria-labelledby="h-changes">
+            <h2 class="card-title" id="h-changes">التغييرات منذ الفحص السابق</h2>
+            <div id="mon-changes"></div>
+          </section>
+          <section class="card" aria-labelledby="h-trend">
+            <h2 class="card-title" id="h-trend">الخط الزمني</h2>
+            <div id="mon-trend"></div>
+          </section>
+        </div>
+
+        <section class="card" aria-labelledby="h-mrecs">
+          <h2 class="card-title" id="h-mrecs">الإجراءات المطلوبة نظاميًا</h2>
+          <div class="recs" id="mon-recs"></div>
+        </section>
+
+        <section class="card" aria-labelledby="h-mfind">
+          <div class="card-head">
+            <h2 class="card-title" id="h-mfind">الملاحظات في المجلد</h2>
+            <div class="segmented" id="mon-filter" role="group" aria-label="تصفية حسب الخطورة"></div>
+          </div>
+          <ul class="findings" id="mon-findings"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="h-runs">
+          <h2 class="card-title" id="h-runs">سجل الفحوصات</h2>
+          <div class="table-wrap"><table class="table" id="mon-runs"></table></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ٤) الخصوصية -->
+  <section class="view" id="view-privacy" aria-labelledby="h-privacy">
+    <div class="container narrow">
+      <header class="page-header">
+        <h1 id="h-privacy">الخصوصية ومعالجة الملفات</h1>
+        <p>توضح هذه الصفحة ما يحدث فعليًا للملفات في هذه النسخة من الخدمة.</p>
+      </header>
+      <section class="card prose">
+        <h2>أين تُعالج الملفات؟</h2>
+        <p>تُعالج الملفات على الخادم الذي يشغّل الخدمة. في هذه النسخة يعمل الخادم على الجهاز نفسه (localhost)، ولا يرسل محتوى الملفات إلى أي خدمة خارجية. النموذج اللغوي المستخدم في الفحص والإجابة يعمل محليًا على الجهاز نفسه عبر Ollama.</p>
+        <h2>ماذا يُحفظ وإلى متى؟</h2>
+        <ul>
+          <li><b>الملف المرفوع:</b> يُحفظ في مجلد مؤقت أثناء الفحص فقط، ويُحذف فور انتهائه.</li>
+          <li><b>نتيجة الفحص:</b> أنواع البيانات المكتشفة ومواقعها وعدد القيم، مع أمثلة مُخفاة (أول حرف وآخر حرف فقط). تبقى في ذاكرة الخادم لإتاحة الأسئلة والتقرير، وتُمسح عند إيقاف الخادم.</li>
+          <li><b>المراقبة الدورية:</b> لا تنسخ الملفات، بل تقرؤها من مكانها. تحفظ في قاعدة بيانات محلية على الجهاز (data/sanad.duckdb): مسار الملف وبصمة محتواه وحجمه وتاريخ تعديله، وأنواع البيانات المكتشفة مع أمثلة مُخفاة فقط.</li>
+          <li><b>التقرير:</b> يُنشأ في المتصفح عند الطلب، ولا يُحفظ على الخادم.</li>
+        </ul>
+        <h2>ما لا تقدمه هذه النسخة</h2>
+        <ul>
+          <li>لا يوجد تشفير خاص بالبيانات التي تحفظها الخدمة؛ حمايتها تعتمد على حماية الجهاز نفسه.</li>
+          <li>لا تحمل الخدمة أي اعتماد أو شهادة من جهة رسمية.</li>
+          <li>تُحمَّل خطوط العرض من خدمة Google Fonts، ولا يُرسل معها أي محتوى من الملفات.</li>
+        </ul>
+        <h2>حدود الفحص</h2>
+        <ul>
+          <li>يكشف الفحص أنواعًا محددة من البيانات الشخصية. عدم العثور على مؤشرات لا يعني أن الملف خالٍ تمامًا من البيانات الشخصية.</li>
+          <li>ملفات PDF الممسوحة ضوئيًا غير مدعومة.</li>
+          <li>مستويات الخطورة تصنيف داخلي لترتيب الأولويات، والخدمة أداة مساعدة وليست استشارة قانونية.</li>
+        </ul>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer-row">
+    <span>سَنَد — فاحص الملفات قبل المشاركة</span>
+    <span>المرجع: نظام حماية البيانات الشخصية ولوائحه</span>
+  </div>
+</footer>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+project: sanad
+
+ollama:
+  host: http://localhost:11434
+  # نموذج الإجابة: ابدأ بـ qwen2.5:7b، وبدّله بـ ALLaM لما تجهز نسخته
+  chat_model: qwen2.5:3b
+  # نموذج المتجهات: يدعم العربي
+  embed_model: bge-m3
+  temperature: 0
+
+paths:
+  regulations_raw: data/raw/regulations
+  processed: data/processed
+  test_data: data/test
+  chroma: data/chroma
+  warehouse: data/sanad.duckdb

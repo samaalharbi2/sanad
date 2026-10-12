@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.ipynb_checkpoints/
+.pytest_cache/
+
+# البيانات لا ترفع على GitHub
+data/raw/**
+data/processed/**
+data/chroma/**
+!data/**/.gitkeep
+*.duckdb

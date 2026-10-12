@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تقرير فحص الملفات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --navy: #172B45; --primary: #2764A5; --primary-soft: #EAF2FA; --bg: #F4F6F8; --border: #DCE2E9;
+    --text-2: #465467; --danger: #B42318; --danger-soft: #FEF3F2; --warning: #93370D; --warning-soft: #FEF6EE; --neutral-soft: #F2F4F7;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--navy); font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", system-ui, sans-serif;
+    font-size: 13px; line-height: 1.7; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .toolbar { position: sticky; top: 0; z-index: 5; background: var(--navy); padding: 10px 16px;
+    display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .toolbar button { font: inherit; font-size: 14px; font-weight: 600; border: 0; border-radius: 6px; padding: 0 22px; min-height: 40px;
+    cursor: pointer; background: var(--primary); color: #fff; }
+  .toolbar button:hover { background: #1F5088; }
+  .toolbar button:focus-visible { outline: 3px solid #A9C0DA; outline-offset: 2px; }
+  .page { max-width: 210mm; margin: 24px auto; background: #fff; border: 1px solid var(--border); padding: 16mm 15mm; }
+  .msg { text-align: center; color: var(--text-2); padding: 60px 0; }
+
+  header.rep { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    border-bottom: 2px solid var(--navy); padding-bottom: 12px; margin-bottom: 16px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+  .brand b { font-size: 18px; color: var(--navy); }
+  .brand svg { width: 22px; height: 22px; fill: none; stroke: var(--navy); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { font-size: 19px; margin: 6px 0 0; }
+  .meta { color: var(--text-2); font-size: 12px; line-height: 1.9; text-align: left; }
+  .meta b { color: var(--navy); font-weight: 500; }
+  h2 { font-size: 14.5px; margin: 20px 0 8px; color: var(--navy); }
+  .status { border: 1px solid; border-radius: 6px; padding: 10px 12px; }
+  .status b { display: block; font-size: 14px; }
+  .status.warn { background: var(--warning-soft); border-color: #F9DBAF; }
+  .status.info { background: var(--primary-soft); border-color: #C5D9EE; }
+  .status p { margin: 2px 0 0; color: var(--text-2); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+  .kpi { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+  .kpi span { color: var(--text-2); font-size: 11.5px; display: block; }
+  .kpi b { font-size: 20px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: right; font-weight: 600; color: var(--text-2); background: var(--bg); font-size: 11.5px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead { display: table-header-group; }
+  tbody.item { break-inside: avoid; }
+  table.findings { table-layout: fixed; font-size: 11.5px; }
+  table.findings td { overflow-wrap: anywhere; }
+  tr.act td { background: var(--bg); color: var(--text-2); border-bottom: 1px solid var(--border); padding-top: 4px; }
+  tr.act b { color: var(--navy); }
+  tr.main td { border-bottom: 0; }
+  .num { font-variant-numeric: tabular-nums; }
+  .ltr { direction: ltr; unicode-bidi: isolate; font-family: ui-monospace, Consolas, monospace; }
+  .badge { display: inline-block; padding: 0 8px; border-radius: 999px; border: 1px solid; font-size: 11px; white-space: nowrap; }
+  .r-high { color: var(--danger); background: var(--danger-soft); border-color: #F4C7C3; }
+  .r-medium { color: var(--warning); background: var(--warning-soft); border-color: #F9DBAF; }
+  .r-low { color: var(--text-2); background: var(--neutral-soft); border-color: var(--border); }
+  .bar { height: 7px; border-radius: 2px; background: var(--primary); min-width: 2px; }
+  .rec { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; break-inside: avoid; }
+  .rec h3 { font-size: 13px; margin: 0 0 2px; display: flex; gap: 8px; align-items: center; }
+  .tag { font-size: 10.5px; font-weight: 600; padding: 0 6px; border-radius: 4px; border: 1px solid; }
+  .tag.high { color: var(--danger); background: var(--danger-soft); border-color: #F4C7C3; }
+  .tag.medium { color: var(--warning); background: var(--warning-soft); border-color: #F9DBAF; }
+  .tag.info { color: var(--text-2); background: var(--neutral-soft); border-color: var(--border); }
+  .rec p { margin: 0; color: var(--text-2); }
+  .refs { color: var(--primary); font-size: 11.5px; margin-top: 2px; }
+  small.sub { display: block; color: var(--text-2); }
+  .bad { color: var(--danger); }
+  footer.rep { margin-top: 20px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-2); font-size: 11px; }
+  footer.rep p { margin: 0 0 4px; }
+  footer.rep b { color: var(--navy); }
+
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .page { margin: 0; padding: 0; border: 0; max-width: none; }
+  }
+  @media (max-width: 640px) {
+    .page { margin: 0; padding: 20px 16px; border: 0; }
+    .kpis { grid-template-columns: 1fr 1fr; } .split { grid-template-columns: 1fr; }
+    header.rep { flex-direction: column; } .meta { text-align: right; }
+    .wide { overflow-x: auto; } .wide table { min-width: 620px; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button type="button" onclick="window.print()">حفظ التقرير PDF</button>
+</div>
+<main class="page" id="page"><p class="msg">جاري تجهيز التقرير…</p></main>
+
+<script>
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n) => Number(n || 0).toLocaleString("en-US");
+const pad = (n) => String(n).padStart(2, "0");
+const when = (iso) => { const d = new Date(iso); return isNaN(d) ? "" : `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} · ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const CATS = ["بيانات شخصية", "بيانات حساسة", "بيانات ائتمانية"];
+const RISKS = ["عالية", "متوسطة", "منخفضة"];
+const RISK_CLS = { "عالية": "r-high", "متوسطة": "r-medium", "منخفضة": "r-low" };
+const TAG = { high: "عاجل", medium: "مهم", info: "تنظيمي" };
+const ORDER = { "عالية": 0, "متوسطة": 1, "منخفضة": 2 };
+const filesAr = (n) => n === 1 ? "ملف واحد" : n === 2 ? "ملفين" : n <= 10 ? `${n} ملفات` : `${fmt(n)} ملف`;
+function whereAr(withPii, total) {
+  if (withPii === total) return total === 1 ? "في الملف" : total === 2 ? "في الملفين" : `في كل الملفات الـ${fmt(total)}`;
+  return `في ${filesAr(withPii)} من أصل ${fmt(total)}`;
+}
+const riskBadge = (r) => `<span class="badge ${RISK_CLS[r] || "r-low"}">خطورة ${esc(r)}</span>`;
+
+function breakdown(findings, key, keys, label = (k) => esc(k)) {
+  const by = {}; findings.forEach((f) => { by[f[key]] = (by[f[key]] || 0) + f.rows; });
+  const total = Object.values(by).reduce((a, b) => a + b, 0) || 1;
+  return `<table><tbody>${keys.filter((k) => by[k]).map((k) => `<tr>
+    <td style="width:34%">${label(k)}</td>
+    <td style="vertical-align:middle"><div class="bar" style="width:${(by[k] / total) * 100}%"></div></td>
+    <td class="num" style="width:30%;text-align:left;white-space:nowrap">${fmt(by[k])} معلومة (${Math.round((by[k] / total) * 100)}%)</td></tr>`).join("")}</tbody></table>`;
+}
+
+function render(d) {
+  const f = [...d.findings].sort((a, b) => ORDER[a.risk] - ORDER[b.risk] || b.rows - a.rows);
+  const ok = d.files.filter((x) => !x.error);
+  const total = f.reduce((a, x) => a + x.rows, 0);
+  const sensitive = f.filter((x) => x.category === "بيانات حساسة").reduce((a, x) => a + x.rows, 0);
+  const filesWith = new Set(f.map((x) => x.file)).size;
+  document.title = `تقرير سَنَد — ${when(d.generated_at).split(" ·")[0]}`;
+
+  document.getElementById("page").innerHTML = `
+  <header class="rep">
+    <div>
+      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>سَنَد</b> · فاحص الملفات قبل المشاركة</div>
+      <h1>تقرير فحص الملفات</h1>
+    </div>
+    <div class="meta">
+      تاريخ التقرير: <b>${esc(when(d.generated_at))}</b><br>
+      تاريخ الفحص: <b>${esc(when(d.scanned_at))}</b><br>
+      ${d.kind === "run" ? `المجلد: <bdi dir="ltr">${esc(d.folder)}</bdi>` : "المصدر: ملفات مرفوعة"}
+    </div>
+  </header>
+
+  <section>
+    ${f.length
+      ? `<div class="status warn"><b>تم العثور على مؤشرات بيانات شخصية</b><p>تم العثور على ${fmt(total)} معلومة شخصية ${whereAr(filesWith, ok.length)}${sensitive ? `، منها ${fmt(sensitive)} معلومة حساسة` : ""}.</p></div>`
+      : `<div class="status info"><b>لم يتم العثور على مؤشرات مطابقة</b><p>هذا لا يعني أن الملفات خالية تمامًا من البيانات الشخصية؛ الفحص يغطي أنواعًا محددة.</p></div>`}
+    <div class="kpis">
+      <div class="kpi"><b>${fmt(ok.length)}</b><span>الملفات التي تم فحصها</span></div>
+      <div class="kpi"><b>${fmt(d.records)}</b><span>السجلات التي تم فحصها</span></div>
+      <div class="kpi"><b>${fmt(total)}</b><span>المعلومات الشخصية المكتشفة</span></div>
+      <div class="kpi"><b>${fmt(sensitive)}</b><span>المعلومات الحساسة المكتشفة</span></div>
+    </div>
+  </section>
+
+  ${f.length ? `<section class="split">
+    <div><h2>التصنيف حسب النظام</h2>${breakdown(f, "category", CATS)}</div>
+    <div><h2>مستوى الخطورة</h2>${breakdown(f, "risk", RISKS, riskBadge)}</div>
+  </section>` : ""}
+
+  ${d.recommendations.length ? `<section>
+    <h2>الإجراءات المطلوبة نظاميًا</h2>
+    ${d.recommendations.map((r) => `<div class="rec"><h3><span class="tag ${r.level}">${TAG[r.level]}</span>${esc(r.title)}</h3>
+      <p>${esc(r.body)}</p><div class="refs">${r.refs.map(esc).join(" · ")}</div></div>`).join("")}
+  </section>` : ""}
+
+  ${f.length ? `<section class="wide">
+    <h2>الملاحظات</h2>
+    <table class="findings"><colgroup><col style="width:27%"><col style="width:14%"><col style="width:13%"><col style="width:11%"><col style="width:9%"><col style="width:9%"><col style="width:17%"></colgroup>
+    <thead><tr><th>الموقع</th><th>نوع البيانات</th><th>التصنيف</th><th>الخطورة</th><th>الثقة</th><th>العدد</th><th>مثال مُخفى</th></tr></thead>
+    ${f.map((x) => `<tbody class="item"><tr class="main">
+      <td><bdi>${esc(x.file)}</bdi><small class="sub">${x.sheet ? `${esc(x.sheet)} · ` : ""}${x.column === "(نص حر)" ? "النص" : `عمود <bdi>${esc(x.column)}</bdi>`}</small></td>
+      <td>${esc(x.label_ar)}</td><td>${esc(x.category)}</td><td><span class="badge ${RISK_CLS[x.risk] || "r-low"}">${esc(x.risk)}</span></td><td>${esc(x.confidence)}</td>
+      <td class="num">${fmt(x.rows)}</td><td><span class="ltr">${esc(x.sample)}</span></td></tr>
+      ${x.action ? `<tr class="act"><td colspan="7"><b>الإجراء المقترح:</b> ${esc(x.action)}</td></tr>` : ""}</tbody>`).join("")}
+    </table>
+  </section>` : ""}
+
+  <section class="wide">
+    <h2>الملفات المفحوصة</h2>
+    <table><thead><tr><th>الملف</th><th>السجلات</th><th>النتيجة</th></tr></thead>
+    <tbody>${d.files.map((x) => `<tr><td><bdi>${esc(x.name)}</bdi></td><td class="num">${x.error ? "—" : fmt(x.records)}</td>
+      <td>${x.error ? `<span class="bad">تعذّرت القراءة: ${esc(x.error)}</span>` : x.found ? `${fmt(x.found)} ملاحظات` : "لا توجد مؤشرات مطابقة"}</td></tr>`).join("")}</tbody></table>
+  </section>
+
+  <footer class="rep">
+    <p><b>طريقة الفحص:</b> قواعد تحقق (مثل رقم التحقق في الهوية وفحص الآيبان)، وأسماء الأعمدة، ونموذج لغوي يعمل محليًا على الجهاز الذي يشغّل الخدمة، دون إرسال الملفات لأي طرف خارجي. الأمثلة مُخفاة.</p>
+    <p><b>مستوى الخطورة:</b> تصنيف الخدمة لترتيب الأولويات (النظام لا يحدد درجات خطورة). عالية: البيانات الحساسة والائتمانية، والهوية والجواز والآيبان.
+      متوسطة: الاسم والجوال والبريد والعنوان وتاريخ الميلاد. منخفضة: المعرّفات التقنية.</p>
+    <p><b>المرجع:</b> نظام حماية البيانات الشخصية الصادر بالمرسوم الملكي رقم (م/19) وتاريخ 9/2/1443هـ والمعدّل بالمرسوم الملكي رقم (م/148) وتاريخ 5/9/1444هـ، ولائحته التنفيذية، ولائحة نقل البيانات الشخصية إلى خارج المملكة.</p>
+    <p>هذا التقرير أداة مساعدة لرصد البيانات الشخصية، وليس استشارة قانونية. القرار النهائي لمسؤول حماية البيانات الشخصية في الجهة.</p>
+  </footer>`;
+}
+
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const url = q.get("scan") ? `/api/report?scan=${encodeURIComponent(q.get("scan"))}` : "/api/report?run=latest";
+  try {
+    const res = await fetch(url);
+    const d = await res.json();
+    if (!res.ok) throw new Error(typeof d.detail === "string" ? d.detail : "تعذّر تجهيز التقرير.");
+    render(d);
+  } catch (e) {
+    document.getElementById("page").innerHTML = `<p class="msg">${esc(e.message === "Failed to fetch" ? "تعذّر الاتصال بالخادم." : e.message)}</p>`;
+  }
+})();
+</script>
+</body>
+</html>
