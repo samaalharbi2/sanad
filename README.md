@@ -4,7 +4,7 @@
 **Check your file before you share it.**
 A local-first compliance assistant for Saudi Arabia's Personal Data Protection Law (PDPL). Sanad finds personal data in an organization's files, classifies it by the law's definitions, and tells you what the law requires — all running on the organization's own machine.
 
-![Home page](docs/images/home.png)
+
 
 ---
 
@@ -26,40 +26,11 @@ The PDPL and its Implementing Regulation require organizations to collect only t
 | **Suggests** | A practical action for each finding before the file is shared |
 | **Reports** | A printable PDF report for management |
 
-The interface is fully in Arabic (right-to-left).
-
-![Scan results](docs/images/results.png)
-
-![Findings with suggested actions](docs/images/findings.png)
-
-### Scheduled monitoring
-
-![Monitoring](docs/images/monitor.png)
-
-### Report
-
-<img src="docs/images/report.png" width="600" alt="PDF report">
 
 ## Target user
 
 **The Data Protection Officer (DPO).** Article 32 of the Implementing Regulation requires appointing one in several cases — including public entities providing services that involve large-scale processing of personal data. The DPO's duties include overseeing impact assessments and notifying the authority of data breaches. Sanad gives them the picture they need: where the personal data is, how risky it is, and what to do about it.
 
-## How it works
-
-```mermaid
-flowchart LR
-    A[Organization files<br/>Excel · CSV · Word · PDF] --> B[Read & clean]
-    B --> C[Personal data detector<br/>rules + column hints + local LLM]
-    C --> D[Classification<br/>PDPL category · risk · confidence]
-    D --> E[Recommendations<br/>with article references]
-    D --> F[(DuckDB warehouse<br/>history of every scan)]
-    L[PDPL + regulations<br/>amendments merged] --> G[(ChromaDB<br/>one chunk per article)]
-    G --> H[Assistant<br/>Qwen2.5, local]
-    D --> H
-    E --> W[Web app & report]
-    F --> W
-    H --> W
-    P[Prefect<br/>nightly] --> C
 ```
 
 ## Data engineering
@@ -111,9 +82,8 @@ Runs on an ordinary laptop with 8 GB of RAM and no GPU.
 
 ## About the code
 
-This repository shows the web app, the data pipeline (incremental scanning, warehouse, and scheduling), and the retrieval layer over the law. **The personal data detector, the mapping from findings to legal articles, and the assistant's file-specific instructions are not published.** They are available for review on request. See [`src/sanad/pii`](src/sanad/pii/README.md).
+This repository shows the web app, the data pipeline (incremental scanning, warehouse, and scheduling), and the retrieval layer over the law. **The personal data detector, the mapping from findings to legal articles, and the assistant's file-specific instructions are not published.** They are available for review on request. 
 
-All rights reserved — see [NOTICE](NOTICE.md).
 
 ## Legal sources
 
